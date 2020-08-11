@@ -16,8 +16,13 @@ const Styles = StyleSheet.create({
         fontSize: 24,
         lineHeight: 32,
         maxWidth: 200,
-        marginVertical: 40,
-    }
+        marginVertical: 10,
+    },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
 });
 
 export default Styles;
