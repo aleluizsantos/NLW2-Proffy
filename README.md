@@ -1,3 +1,2 @@
-# nlw2
-![Projeto WEB](https://user-images.githubusercontent.com/16269962/89349655-ee48d880-d684-11ea-9e04-127f2f511462.PNG)
-![Projeto Mobile](https://user-images.githubusercontent.com/16269962/89349658-f0129c00-d684-11ea-9022-662258b48978.PNG)
+![NLW2](https://user-images.githubusercontent.com/16269962/89945535-e397c180-dbf7-11ea-9ea4-1c0dda9849d7.png)
+
