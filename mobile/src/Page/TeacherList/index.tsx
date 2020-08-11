@@ -1,6 +1,8 @@
 import React, {useState} from 'react';
-import { View, Text, ScrollView,TextInput } from 'react-native';
+import { View, Text, ScrollView,TextInput, Alert } from 'react-native';
 import { BorderlessButton, RectButton } from 'react-native-gesture-handler';
+import AsyncStorage from '@react-native-community/async-storage';
+import { useFocusEffect } from "@react-navigation/native";
 import { Feather } from '@expo/vector-icons'
 
 import PageHeader from '../../components/PageHeader';
@@ -10,17 +12,31 @@ import api from '../../services/api';
 import styles from './styles';
 
 function TeacherList() {
+    const [favorites, setFavorites] = useState<number[]>([]);
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const [subject, setSubject] =useState('');
     const [week_day, setWeek_day] =useState('');
     const [time, setTime] =useState('');
-    const [teachers, setteachers] = useState([]);
+    const [teachers, setTeachers] = useState([]);
+
+    function loadFavorite() {
+        AsyncStorage.getItem('favorites').then(response =>{
+            if(response) {
+                const favoritesTeacher = JSON.parse(response);
+                const favoritesTeacherId = favoritesTeacher.map((teacher: Teacher) =>{
+                    return teacher.id
+                });
+                setFavorites(favoritesTeacherId);
+            }
+        });
+    }
 
     function handleTogglefiltersVisible() {
         setIsFilterVisible(!isFilterVisible);
     }
 
     async function handleFilterSubmit() {
+        loadFavorite();
        const response =  await api.get('classes', {
            params: {
                subject,
@@ -28,7 +44,7 @@ function TeacherList() {
                time
            }
        });
-       setteachers(response.data);
+       setTeachers(response.data);
        setIsFilterVisible(false);
     }
 
@@ -85,7 +101,11 @@ function TeacherList() {
             >
                 {teachers.map((teacher: Teacher)  => {
                     return (
-                        <Teacheritems key={teacher.id} teacher={teacher} />
+                        <Teacheritems 
+                            key={teacher.id} 
+                            teacher={teacher} 
+                            favorited={favorites.includes(Number(teacher.id))}
+                        />
                     );
                 })}
                 

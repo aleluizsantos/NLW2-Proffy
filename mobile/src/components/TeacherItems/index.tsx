@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, Image, Linking } from  'react-native';
 import { RectButton } from 'react-native-gesture-handler';
+import AsyncStorage from '@react-native-community/async-storage';
 
 import heartOutlineIcon from '../../assets/images/icons/heart-outline.png';
 import unfavoriteIcon from '../../assets/images/icons/unfavorite.png';
 import whatsappIcon from '../../assets/images/icons/whatsapp.png';
 
 import styles from './styles';
+import api from '../../services/api';
 
 export interface Teacher {
     id: string;
@@ -19,13 +21,42 @@ export interface Teacher {
 }
 interface TeacherItemProps {
     teacher: Teacher;
+    favorited: boolean;
 }
 
-const Teacheritems: React.FC<TeacherItemProps> = ({ teacher }) => {
+const Teacheritems: React.FC<TeacherItemProps> = ({ teacher, favorited }) => {
+    const [isFavorite, setIsFavorite] = useState(favorited);
 
     function handleLinkToWhatsapp() {
         // usar um Deep Links do whatsapp
+        api.post('connections', {
+            user_id: teacher.id,
+        })
         Linking.openURL(`whatsapp://send?phone=${teacher.whatsapp}`)
+    }
+
+    async function handleToogleFavorite() {
+        const favorites = await AsyncStorage.getItem('favorites');
+
+        let favoritesArray = [teacher];
+        if(favorites) favoritesArray = JSON.parse(favorites);
+
+        if(isFavorite) {
+            //Remover do favoritos
+            const favoriteIndex = favoritesArray.findIndex((teacherItem: Teacher) => {
+                return teacherItem.id === teacher.id;
+            });
+
+            favoritesArray.splice(favoriteIndex, 1);
+            setIsFavorite(false);
+
+        }else{
+            //Incluir no favoritos
+            favoritesArray.push(teacher);
+            setIsFavorite(true);
+        }
+        
+        await AsyncStorage.setItem('favorites', JSON.stringify(favoritesArray));
     }
 
     return (
@@ -47,9 +78,8 @@ const Teacheritems: React.FC<TeacherItemProps> = ({ teacher }) => {
                     <Text style={styles.priceValue}>R$ {teacher.cost}</Text>
                 </Text>
                 <View style={styles.buttonContainer}>
-                    <RectButton style={[styles.favoriteButton, styles.favorited]}>
-                        {/* <Image source={heartOutlineIcon} /> */}
-                        <Image source={unfavoriteIcon} />
+                    <RectButton onPress={handleToogleFavorite} style={[styles.favoriteButton, isFavorite ? styles.favorited : {}]}>
+                        <Image source={ isFavorite ? unfavoriteIcon : heartOutlineIcon} />
                     </RectButton>
 
                     <RectButton onPress={handleLinkToWhatsapp} style={styles.contactButton}>
